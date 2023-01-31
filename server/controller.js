@@ -10,6 +10,16 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
     }
 })
 module.exports = {
+    // EXTRA CREDIT #2
+    // seed: async () => {
+    //     await sequelize.query(`
+    //       INSERT INTO cities (name, rating, countryId)
+    //       VALUES 
+    //         ('City 1', 5, 1),
+    //         ('City 2', 4, 2),
+    //         ('City 3', 3, 3)
+    //     `);
+    //   },
     seed: (req, res) => {
         sequelize.query(`
             drop table if exists cities;
@@ -233,5 +243,35 @@ module.exports = {
           .then((countries) => {
             res.send(countries[0]);
           });
-        }
-      };
+        },
+            createCity(req, res) {
+              const { name, rating, countryId } = req.body;
+              sequelize.query(`INSERT INTO cities (name, rating, countryId) VALUES ('${name}', ${rating}, ${countryId})`)
+                .then(() => {
+                  res.send({ message: 'City created successfully' });
+                })
+                .catch((error) => {
+                  res.send({ error });
+                });
+            },
+            getCities(req, res) {
+// PART OF STEP 6 sequelize.query("SELECT cities.city_id, cities.name AS city, cities.rating, countries.country_id, countries.name AS country FROM cities JOIN countries ON cities.country_id = countries.country_id")
+                sequelize.query("SELECT cities.city_id, cities.name AS city, cities.rating, countries.country_id, countries.name AS country FROM cities JOIN countries ON cities.country_id = countries.country_id ORDER BY cities.rating DESC")   
+                .then((cities) => {
+                      res.send(cities[0]);
+                    })
+                    .catch((error) => {
+                      res.send({ error });
+                    });
+            },
+            deleteCity(req, res) {
+                const { id } = req.params;
+                sequelize.query(`DELETE FROM cities WHERE city_id = ${id}`)
+                    .then(() => {
+                      res.send({ message: 'City deleted successfully' });
+                    })
+                    .catch((error) => {
+                      res.send({ error });
+                    });
+                }
+              };
